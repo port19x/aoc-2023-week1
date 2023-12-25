@@ -34,10 +34,28 @@
      (s-lines)
      (mapcar (lambda (x) (s-split " " x)))
      (mapcar (lambda (x) (list (parsehand (nth 0 x)) (string-to-number (nth 1 x)))))
-     (-sort (lambda (x y) (r1> (car x) (car y))))
+     ;(-sort (lambda (x y) (r1> (car x) (car y))))
+     (-sort (lambda (x y) (rj> (car x) (car y)))) ;STAR 2
      (mapcar 'cdr)
      (-flatten)
      (reverse)
      ((lambda (x) (-zip-lists (number-sequence 1 (length x)) x)))
      (mapcar (lambda (x) (apply '* x)))
      (-sum))
+
+(setq cardranks '(("2" . 2) ("3" . 3) ("4" . 4) ("5" . 5) ("6" . 6)
+		  ("7" . 7) ("8" . 8) ("9" . 9) ("T" . 10)
+		  ("J" . 0) ("Q" . 12) ("K" . 13) ("A" . 14)))
+
+(defun nmlz (x) (if x x 0))
+
+;(rj> '(0 13 13 7 7) '(2 13 13 7 7)) => t
+(defun rj> (x y)
+  "Full Poker Hand Ranking Algorithm - Joker Version"
+  (let* ((jx (length (-filter 'zerop x)))
+	 (jy (length (-filter 'zerop y)))
+	 (snojx (sort (mapcar 'cdr (-frequencies (-remove 'zerop x))) '>))
+	 (snojy (sort (mapcar 'cdr (-frequencies (-remove 'zerop y))) '>))
+	 (sax (cons (+ jx (nmlz (car snojx))) (cdr snojx)))
+	 (say (cons (+ jy (nmlz (car snojy))) (cdr snojy))))
+    (if (list= sax say) (r2> x y) (r2> sax say))))
